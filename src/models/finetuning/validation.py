@@ -27,19 +27,6 @@ class ValidationEngine:
             entries.append(entry)
         return entries
     
-    # def is_valid_format(self, conformity, min_conformity):
-    #     return 1 if 1 - format_eval < epsilon else 0
-    
-    # def is_consistent_across_runs(self, consistency, epsilon=1e-6):
-    #     return 1 if 1 - consistency < epsilon else 0
-    
-    # def has_acceptable_fpr(self, fpr, epsilon=1e-6):
-    #     return 1 if abs(0 - fpr) < epsilon else 0
-    
-    # def has_acceptable_recall(self, recall, epsilon=1e-6):
-    #     return 1 if 1 - recall < epsilon else 0
-
-
     def get_performance_metrics(
         self, 
         model, 
