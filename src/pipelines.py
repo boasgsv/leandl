@@ -162,7 +162,9 @@ class TrainingPipeline(Pipeline):
         X_vl, y_vl,
         base_model_name = "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit",
         cycles: int = 30,
-        num_inferences: int = 5
+        num_inferences: int = 5,
+        model_name: str = 'bob',
+        version: str = 'v1'
     ):     
         model, tokenizer = get_model_tokenizer(model_name=base_model_name)
         trainer = get_trainer(model=model, tokenizer=tokenizer, X=X_train, y=y_train)
@@ -179,8 +181,9 @@ class TrainingPipeline(Pipeline):
                 break
 
             trainer.train()
-            predictions_di = {'appid': X_vl.index.to_list()}
+
             raw_generated_texts_di = {'appid': X_vl.index.to_list()}
+            predictions_di = {'appid': X_vl.index.to_list()}
             for j in range(num_inferences):
                 raw_generated_texts_di[f'r{j}'] = self.inference.run(texts=texts, model=model, tokenizer=tokenizer)
                 predictions_di[f'r{j}'] = self.parser.parse_predictions(raw_generated_texts=raw_generated_texts_di[f'r{j}'])
@@ -194,14 +197,14 @@ class TrainingPipeline(Pipeline):
                 pd.DataFrame(raw_generated_texts_di)
                 .melt(id_vars='appid', var_name='run', value_name='text')
             )
-            self.dumper.dump_raw_generated_texts(raw_generated_texts_df=raw_generated_texts_df, model_name='bob', version='v1', cycle_id=i)
+            self.dumper.dump_raw_generated_texts(raw_generated_texts_df=raw_generated_texts_df, model_name=model_name, version=version, cycle_id=i)
             
             report = self.evaluator.get_performance_report(predictions_df=predictions_df, y=y_vl)
             should_continue_training = self.validator.get_assessment(report=report)
             
-            self.dumper.dump_predictions(predictions_df=predictions_df, model_name='bob', version='v1', cycle_id=i)
+            self.dumper.dump_predictions(predictions_df=predictions_df, model_name=model_name, version=version, cycle_id=i)
             if i % 5 == 0:
-                self.dumper.dump_model(model=model, model_name='bob', version='v1', step=f'm{i}')
+                self.dumper.dump_model(model=model, model_name=model_name, version=version, step=f'm{i}')
             all_predictions_dfs.append(predictions_df)
 
             self.logger.notify_cycle_end(i)
